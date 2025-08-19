@@ -1,15 +1,15 @@
 # useful for defbugging
-resource "local_file" "landscape_config" {
-  count    = var.instance_count
-  content  = templatefile("${path.module}/client.conf.tpl", local.client_configs[count.index])
-  filename = "${path.module}/landscape-client-${count.index}.conf"
-}
+# resource "local_file" "landscape_config" {
+#   count    = var.instance_count
+#   content  = templatefile("${path.module}/client.conf.tpl", local.client_configs[count.index])
+#   filename = "${path.module}/landscape-client-${count.index}.conf"
+# }
 
-resource "local_file" "cloud_init_user_data" {
-  count    = var.instance_count
-  content  = local.cloud_init_configs[count.index]
-  filename = "${path.module}/cloud-init-${count.index}.yaml"
-}
+# resource "local_file" "cloud_init_user_data" {
+#   count    = var.instance_count
+#   content  = local.cloud_init_configs[count.index]
+#   filename = "${path.module}/cloud-init-${count.index}.yaml"
+# }
 
 resource "lxd_cached_image" "series" {
   source_image  = var.source_image
