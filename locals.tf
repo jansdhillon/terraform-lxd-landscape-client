@@ -18,7 +18,7 @@ locals {
     ssl_public_key          = var.client_config.ssl_public_key
     tags                    = var.client_config.tags
     url                     = coalesce(var.client_config.url, "https://${var.client_config.fqdn}/message-system")
-    package_hash_id_url     = coalesce(var.client_config.package_hash_id_url, "http://${var.client_config.fqdn}/hash-id-databases")
+    package_hash_id_url     = coalesce(var.client_config.package_hash_id_url, "https://${var.client_config.fqdn}/hash-id-databases")
   }
 
   landscape_client_config = templatefile("${path.module}/client.conf.tpl", local.client_config_merged)
@@ -37,7 +37,6 @@ locals {
       conf_path           = var.instance_landscape_config_path
       ppa                 = var.ppa
       ssl_public_key      = local.client_configs[i].ssl_public_key
-      fetch_ssl_cert      = local.client_configs[i].ssl_public_key == null || local.client_configs[i].ssl_public_key == ""
       ssl_public_key_path = var.instance_landscape_server_ssl_public_key_path
       http_proxy          = local.client_configs[i].http_proxy
       https_proxy         = local.client_configs[i].https_proxy
