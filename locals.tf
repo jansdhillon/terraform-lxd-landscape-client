@@ -31,15 +31,16 @@ locals {
 
   cloud_init_configs = [
     for i in range(var.instance_count) : templatefile("${path.module}/cloud-init.yaml.tpl", {
-      pro_token      = var.pro_token
-      fqdn           = local.client_configs[i].fqdn
-      conf_content   = templatefile("${path.module}/client.conf.tpl", local.client_configs[i])
-      conf_path      = var.instance_landscape_config_path
-      ppa            = var.ppa
-      ssl_public_key = local.client_configs[i].ssl_public_key
-      fetch_ssl_cert = local.client_configs[i].ssl_public_key == null || local.client_configs[i].ssl_public_key == ""
-      http_proxy     = local.client_configs[i].http_proxy
-      https_proxy    = local.client_configs[i].https_proxy
+      pro_token           = var.pro_token
+      fqdn                = local.client_configs[i].fqdn
+      conf_content        = templatefile("${path.module}/client.conf.tpl", local.client_configs[i])
+      conf_path           = var.instance_landscape_config_path
+      ppa                 = var.ppa
+      ssl_public_key      = local.client_configs[i].ssl_public_key
+      fetch_ssl_cert      = local.client_configs[i].ssl_public_key == null || local.client_configs[i].ssl_public_key == ""
+      ssl_public_key_path = var.instance_landscape_server_ssl_public_key_path
+      http_proxy          = local.client_configs[i].http_proxy
+      https_proxy         = local.client_configs[i].https_proxy
     })
   ]
 

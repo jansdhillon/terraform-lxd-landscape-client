@@ -15,6 +15,11 @@ variable "instance_landscape_config_path" {
   description = "where the Landscape Client config will be written in each instance"
 }
 
+variable "instance_landscape_server_ssl_public_key_path" {
+  type    = string
+  default = "/etc/landscape/server.pem"
+}
+
 variable "client_config" {
   type = object({
     bus                     = optional(string, "session")

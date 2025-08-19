@@ -1,3 +1,16 @@
+# useful for defbugging
+# resource "local_file" "landscape_config" {
+#   count    = var.instance_count
+#   content  = templatefile("${path.module}/client.conf.tpl", local.client_configs[count.index])
+#   filename = "${path.module}/landscape-client-${count.index}.conf"
+# }
+
+# resource "local_file" "cloud_init_user_data" {
+#   count    = var.instance_count
+#   content  = local.cloud_init_configs[count.index]
+#   filename = "${path.module}/cloud-init-${count.index}.yaml"
+# }
+
 resource "lxd_cached_image" "series" {
   source_image  = var.source_image
   source_remote = var.source_remote
@@ -10,7 +23,7 @@ resource "lxd_instance" "instance" {
   type  = var.instance_type
 
   config = merge(var.lxd_config, {
-    "user.user-data" = local.cloud_init_contents
+    "user.user-data" = var.cloud_init_contents != null ? var.cloud_init_contents : local.cloud_init_configs[count.index]
   })
 
   timeouts = {
@@ -26,5 +39,4 @@ resource "lxd_instance" "instance" {
       fail_on_error = false
     }
   }
-
 }
