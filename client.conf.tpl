@@ -1,0 +1,19 @@
+[client]
+bus = ${bus}
+computer_title = ${computer_title}
+account_name = ${account_name}
+registration_key = ${registration_key}
+url = http://${fqdn}/message-system
+package_hash_id_url = http://${fqdn}/hash-id-databases
+data_path = ${data_path}
+log_dir = ${log_dir}
+log_level = ${log_level}
+pid_file = ${pid_file}
+ping_url = ${ping_url}
+include_manager_plugins = ${include_manager_plugins}
+include_monitor_plugins = ${include_monitor_plugins}
+script_users = ${script_users}
+ssl_public_key = ${ssl_public_key}
+tags = ${tags} 
+package-hash-id-url = ${package_hash_id_url}
+pid-file = ${pid_file}

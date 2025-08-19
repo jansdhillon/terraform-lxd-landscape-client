@@ -33,3 +33,5 @@ override.tf.json
 .terraformrc
 terraform.rc
 .terraform.lock.hcl
+client.conf
+cloud-init.yaml

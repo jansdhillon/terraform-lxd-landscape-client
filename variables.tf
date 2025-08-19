@@ -1,50 +1,66 @@
-variable "account_name" {
-  type        = string
-  description = "Account name of Landscape Server, ex. standalone"
-}
-
 variable "architecture" {
   type        = string
   default     = "amd64"
   description = "CPU architecture"
 }
 
-variable "bus" {
-  type    = string
-  default = null
-}
-
-variable "container" {
-  type    = string
-  default = "container"
-}
-
-variable "config" {
-  type = map(string)
+variable "lxd_config" {
+  type    = map(string)
   default = {}
 }
 
-variable "computer_title" {
-  type = string
+variable "instance_landscape_config_path" {
+  type        = string
+  default     = "/etc/landscape/client.conf"
+  description = "where the Landscape Client config will be written in each instance"
 }
 
-
-variable "instance_count" {
-  type = number
+variable "client_config" {
+  type = object({
+    bus                     = optional(string, "session")
+    computer_title          = string
+    account_name            = string
+    registration_key        = optional(string, "")
+    fqdn                    = string
+    data_path               = optional(string, "/var/lib/landscape/client")
+    http_proxy              = optional(string)
+    https_proxy             = optional(string)
+    log_dir                 = optional(string, "/var/log/landscape")
+    log_level               = optional(string, "info")
+    pid_file                = optional(string, "/var/run/landscape-client.pid")
+    ping_url                = optional(string)
+    include_manager_plugins = optional(string, "ScriptExecution")
+    include_monitor_plugins = optional(string, "ALL")
+    script_users            = optional(string, "landscape,root")
+    ssl_public_key          = optional(string, "/etc/landscape/server.pem")
+    tags                    = optional(string, "")
+    url                     = optional(string)
+    package_hash_id_url     = optional(string, null)
+  })
 }
 
-variable "data_path" {
+variable "cloud_init_path" {
   type    = string
   default = null
 }
 
-# https://registry.terraform.io/providers/terraform-lxd/lxd/latest/docs/resources/instance
+variable "cloud_init_contents" {
+  type    = string
+  default = null
+}
+
+variable "instance_count" {
+  type    = number
+  default = 1
+}
+
 variable "device" {
   type = object({
     name       = string
     type       = string
     properties = map(string)
   })
+  default = null
 }
 
 variable "ephemeral" {
@@ -52,90 +68,25 @@ variable "ephemeral" {
   default = false
 }
 
-variable "fqdn" {
-  type        = string
-  description = "IP address or FQDN of Landscape Server to register with."
-}
-
-variable "include_manager_plugins" {
-  type    = string
-  default = "ALL"
-}
-
-variable "include_monitor_plugins" {
-  type    = string
-  default = "ALL"
-}
-
 variable "instance_name_prefix" {
   type        = string
   description = "The name of the instance to prepend to '-{index}'."
 }
 
-variable "instance_types" {
-  type    = list(string)
-  default = ["virtual-machine", "container"]
-}
-
 variable "instance_type" {
   type    = string
-  default = "virtual-machine"
+  default = "container"
 
   validation {
-    condition     = contains(var.instance_types, var.instance_type)
-    error_message = "valid values are: ${join(", ", var.instance_types)}"
+    condition     = contains(["virtual-machine", "container"], var.instance_type)
+    error_message = "valid values are: virtual-machine, container"
   }
 }
 
 variable "image" {
   type        = string
   default     = "ubuntu"
-  description = "The name of the image on the defaul"
-}
-
-variable "image_fingerprint" {
-  type    = string
-  default = null
-}
-
-variable "source_image" {
-  type = string
-}
-
-variable "source_remote" {
-  type    = string
-  default = "ubuntu"
-
-  validation {
-    condition     = var.source_remote != null && var.source_image != null
-    error_message = "Source image "
-  }
-}
-
-
-variable "log_dir" {
-  type    = string
-  default = null
-}
-
-variable "log_level" {
-  type    = string
-  default = null
-}
-
-variable "package_hash_id_url" {
-  type    = string
-  default = null
-}
-
-variable "pid_file" {
-  type    = string
-  default = null
-}
-
-variable "ping_url" {
-  type    = string
-  default = null
+  description = "The name of the image"
 }
 
 variable "pro_token" {
@@ -148,33 +99,29 @@ variable "profiles" {
   default = null
 }
 
-variable "registration_key" {
+variable "ppa" {
   type        = string
-  description = "Registration key for Landscape Server"
-  default     = null
+  default     = "ppa:landscape/self-hosted-beta"
+  description = "PPA for Landscape client installation"
 }
 
-variable "remote" {
-  type    = string
-  default = "default"
+variable "source_image" {
+  type        = string
+  description = "Fingerprint or alias of image to pull."
 }
 
-variable "script_users" {
+variable "source_remote" {
   type    = string
-  default = "ALL"
+  default = "ubuntu"
 }
 
-variable "virtual_machine" {
-  type    = string
-  default = "virtual-machine"
+variable "wait_for_cloud_init" {
+  type    = bool
+  default = true
 }
 
-variable "cloud_init_path" {
-  type    = string
-  default = "${path.module}/cloud-init.yaml"
-}
-
-variable "cloud_init_contents" {
-  type    = string
-  default = null
+variable "timeout" {
+  type        = string
+  description = "duration string to wait for instances to deploy"
+  default     = "30m"
 }

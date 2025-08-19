@@ -1,0 +1,10 @@
+# pro_token = "my-pro-token"
+instance_name_prefix = "landscape-client"
+source_image         = "noble"
+
+client_config = {
+  fqdn             = "landscape.example.com"
+  registration_key = "key"
+  account_name     = "standalone"
+  computer_title   = "tf-client"
+}
