@@ -13,12 +13,13 @@
 
 resource "lxd_cached_image" "series" {
   source_image  = var.source_image
+  aliases = null
   source_remote = var.source_remote
 }
 
 resource "lxd_instance" "instance" {
   count = var.instance_count
-  name  = "${var.instance_name_prefix}-${count.index}"
+  name  = "${var.client_config.computer_title}-${count.index}"
   image = lxd_cached_image.series.fingerprint
   type  = var.instance_type
 

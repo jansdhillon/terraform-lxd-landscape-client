@@ -73,11 +73,6 @@ variable "ephemeral" {
   default = false
 }
 
-variable "instance_name_prefix" {
-  type        = string
-  description = "The name of the instance to prepend to '-{index}'."
-}
-
 variable "instance_type" {
   type    = string
   default = "container"
