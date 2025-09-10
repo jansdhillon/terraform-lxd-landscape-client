@@ -1,5 +1,4 @@
 pro_token        = "my-pro-token"
-source_image     = "noble"
 account_name     = "standalone"
 fqdn             = "landscape.example.com"
 registration_key = "key"
@@ -7,14 +6,20 @@ registration_key = "key"
 instances = [
 
   {
-    computer_title   = "ls-client"
+    image_alias           = "noble"
+    computer_title        = "ls-client"
     additional_cloud_init = <<EOT
 #cloud-config
+apt:
+  sources:
+    fish-ppa:
+      source: "ppa:fish-shell/release-4"
 packages:
-  - zsh
+  - fish
+  - landscape-client
 users:
   - name: ubuntu
-    shell: /usr/bin/zsh
+    shell: /usr/bin/fish
     sudo: ALL=(ALL) NOPASSWD:ALL
 EOT
 
@@ -22,7 +27,8 @@ EOT
 
 
   {
-    computer_title   = "ls-client2"
+    image_alias    = "jammy"
+    computer_title = "ls-client2"
   },
 
 ]
