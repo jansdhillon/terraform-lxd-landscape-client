@@ -1,31 +1,41 @@
-# useful for defbugging
-# resource "local_file" "landscape_config" {
-#   count    = var.instance_count
-#   content  = templatefile("${path.module}/client.conf.tpl", local.client_configs[count.index])
-#   filename = "${path.module}/landscape-client-${count.index}.conf"
-# }
-
-# resource "local_file" "cloud_init_user_data" {
-#   count    = var.instance_count
-#   content  = local.cloud_init_configs[count.index]
-#   filename = "${path.module}/cloud-init-${count.index}.yaml"
-# }
-
 resource "lxd_cached_image" "series" {
   source_image  = var.source_image
-  aliases = null
+  aliases       = null
   source_remote = var.source_remote
 }
 
+data "utils_deep_merge_yaml" "merged_cloud_init" {
+  for_each = {
+    for instance in var.instances : instance.computer_title => instance
+    if instance.additional_cloud_init != null
+  }
+
+  input = [
+    local.cloud_init_configs[each.key],
+    each.value.additional_cloud_init
+  ]
+}
+
 resource "lxd_instance" "instance" {
-  count = var.instance_count
-  name  = "${var.client_config.computer_title}-${count.index}"
+  for_each = { for instance in var.instances : instance.computer_title => instance }
+
+  name  = each.value.computer_title
   image = lxd_cached_image.series.fingerprint
   type  = var.instance_type
 
   config = merge(var.lxd_config, {
-    "user.user-data" = var.cloud_init_contents != null ? var.cloud_init_contents : local.cloud_init_configs[count.index]
+    "user.user-data" = each.value.additional_cloud_init != null ? "#cloud-config\n${data.utils_deep_merge_yaml.merged_cloud_init[each.key].output}" : local.cloud_init_configs[each.key]
   })
+
+
+  dynamic "device" {
+    for_each = each.value.device != null ? [each.value.device] : []
+    content {
+      name       = device.value.name
+      type       = device.value.type
+      properties = device.value.properties
+    }
+  }
 
   timeouts = {
     create = var.timeout
@@ -35,9 +45,10 @@ resource "lxd_instance" "instance" {
     "wait_for_cloud_init" = {
       command       = ["cloud-init", "status", "--wait"]
       enabled       = var.wait_for_cloud_init
-      trigger       = "once"
+      trigger       = "on_change"
       record_output = true
       fail_on_error = false
     }
   }
+
 }

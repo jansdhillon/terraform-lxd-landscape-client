@@ -1,10 +1,28 @@
-# pro_token = "my-pro-token"
-instance_name_prefix = "landscape-client"
-source_image         = "noble"
+pro_token        = "my-pro-token"
+source_image     = "noble"
+account_name     = "standalone"
+fqdn             = "landscape.example.com"
+registration_key = "key"
 
-client_config = {
-  fqdn             = "landscape.example.com"
-  registration_key = "key"
-  account_name     = "standalone"
-  computer_title   = "tf-client"
-}
+instances = [
+
+  {
+    computer_title   = "ls-client"
+    additional_cloud_init = <<EOT
+#cloud-config
+packages:
+  - zsh
+users:
+  - name: ubuntu
+    shell: /usr/bin/zsh
+    sudo: ALL=(ALL) NOPASSWD:ALL
+EOT
+
+  },
+
+
+  {
+    computer_title   = "ls-client2"
+  },
+
+]

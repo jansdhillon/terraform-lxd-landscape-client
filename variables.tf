@@ -20,13 +20,29 @@ variable "instance_landscape_server_ssl_public_key_path" {
   default = "/etc/landscape/server.pem"
 }
 
-variable "client_config" {
-  type = object({
+variable "registration_key" {
+  type     = string
+  nullable = true
+}
+
+variable "account_name" {
+  type        = string
+  description = "Landscape Server account name"
+}
+
+variable "fqdn" {
+  type        = string
+  description = "Landscape Server FQDN"
+}
+
+
+variable "instances" {
+  type = set(object({
     bus                     = optional(string, "session")
     computer_title          = string
-    account_name            = string
-    registration_key        = optional(string, "")
-    fqdn                    = string
+    account_name            = optional(string)
+    registration_key        = optional(string)
+    fqdn                    = optional(string)
     data_path               = optional(string, "/var/lib/landscape/client")
     http_proxy              = optional(string)
     https_proxy             = optional(string)
@@ -40,8 +56,24 @@ variable "client_config" {
     ssl_public_key          = optional(string, "/etc/landscape/server.pem")
     tags                    = optional(string, "")
     url                     = optional(string)
-    package_hash_id_url     = optional(string, null)
-  })
+    package_hash_id_url     = optional(string)
+    additional_cloud_init   = optional(string)
+    device                  = optional(object({
+      name       = string
+      type       = string
+      properties = map(string)
+    }))
+  }))
+  
+  validation {
+    condition = alltrue([
+      for instance in var.instances : 
+      instance.additional_cloud_init == null || 
+      can(yamldecode(instance.additional_cloud_init)) &&
+      contains(try(yamldecode(instance.additional_cloud_init).packages, []), "landscape-client")
+    ])
+    error_message = "When additional_cloud_init is provided, it must include 'landscape-client' in the packages list to ensure proper Landscape functionality."
+  }
 }
 
 variable "cloud_init_path" {
@@ -49,15 +81,6 @@ variable "cloud_init_path" {
   default = null
 }
 
-variable "cloud_init_contents" {
-  type    = string
-  default = null
-}
-
-variable "instance_count" {
-  type    = number
-  default = 1
-}
 
 variable "device" {
   type = object({
@@ -81,12 +104,6 @@ variable "instance_type" {
     condition     = contains(["virtual-machine", "container"], var.instance_type)
     error_message = "valid values are: virtual-machine, container"
   }
-}
-
-variable "image" {
-  type        = string
-  default     = "ubuntu"
-  description = "The name of the image"
 }
 
 variable "pro_token" {
