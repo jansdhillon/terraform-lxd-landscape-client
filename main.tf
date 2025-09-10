@@ -1,20 +1,6 @@
-locals {
-  instance_configs = {
-    for instance in var.instances : instance.computer_title => {
-      image = coalesce(
-        instance.image_alias,
-        instance.fingerprint,
-        var.image_alias,
-        var.fingerprint
-      )
-      is_alias = coalesce(instance.image_alias, var.image_alias) != null
-    }
-  }
-}
-
 resource "lxd_cached_image" "image_name" {
   for_each = {
-    for k, v in local.instance_configs : v.image => v
+    for k, v in local.instance_images : v.image => v
   }
 
   source_image  = each.value.image
@@ -38,7 +24,7 @@ resource "lxd_instance" "instance" {
   for_each = { for instance in var.instances : instance.computer_title => instance }
 
   name  = each.value.computer_title
-  image = lxd_cached_image.image_name[local.instance_configs[each.key].image].fingerprint
+  image = lxd_cached_image.image_name[local.instance_images[each.key].image].fingerprint
   type  = var.instance_type
 
   config = merge(var.lxd_config, {
