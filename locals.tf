@@ -41,15 +41,4 @@ locals {
     })
   }
 
-  instance_images = {
-    for instance in var.instances : instance.computer_title => {
-      image = coalesce(
-        instance.image_alias,
-        instance.fingerprint,
-        var.image_alias,
-        var.fingerprint
-      )
-      is_alias = coalesce(instance.image_alias, var.image_alias) != null
-    }
-  }
 }
