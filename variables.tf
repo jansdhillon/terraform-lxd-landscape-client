@@ -40,6 +40,7 @@ variable "instances" {
   type = set(object({
     bus                     = optional(string, "session")
     computer_title          = string
+    image                   = optional(string)
     account_name            = optional(string)
     registration_key        = optional(string)
     fqdn                    = optional(string)
@@ -58,21 +59,28 @@ variable "instances" {
     url                     = optional(string)
     package_hash_id_url     = optional(string)
     additional_cloud_init   = optional(string)
-    device                  = optional(object({
+    device = optional(object({
       name       = string
       type       = string
       properties = map(string)
     }))
   }))
-  
+
   validation {
     condition = alltrue([
-      for instance in var.instances : 
-      instance.additional_cloud_init == null || 
+      for instance in var.instances :
+      instance.additional_cloud_init == null ||
       can(yamldecode(instance.additional_cloud_init)) &&
       contains(try(yamldecode(instance.additional_cloud_init).packages, []), "landscape-client")
     ])
     error_message = "When additional_cloud_init is provided, it must include 'landscape-client' in the packages list to ensure proper Landscape functionality."
+  }
+
+  validation {
+    condition = var.image != null || alltrue([
+      for instance in var.instances : instance.image != null
+    ])
+    error_message = "Either var.image must be set or all instances must specify an image."
   }
 }
 
@@ -122,12 +130,13 @@ variable "ppa" {
   description = "PPA for Landscape client installation"
 }
 
-variable "source_image" {
+variable "image" {
   type        = string
-  description = "Fingerprint or alias of image to pull."
+  default     = null
+  description = "Default fingerprint or alias of image to pull. Can be overridden per instance."
 }
 
-variable "source_remote" {
+variable "remote" {
   type    = string
   default = "ubuntu"
 }

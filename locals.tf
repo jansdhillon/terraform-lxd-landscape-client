@@ -1,8 +1,8 @@
 locals {
-  fqdn = var.fqdn
-  account_name = var.account_name
+  fqdn             = var.fqdn
+  account_name     = var.account_name
   registration_key = var.registration_key
-  pro_token = var.pro_token
+  pro_token        = var.pro_token
   instance_configs = {
     for config in var.instances : config.computer_title => {
       bus                     = config.bus

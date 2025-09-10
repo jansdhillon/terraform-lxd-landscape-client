@@ -1,7 +1,11 @@
-resource "lxd_cached_image" "series" {
-  source_image  = var.source_image
+resource "lxd_cached_image" "image_name" {
+  for_each = toset([
+    for instance in var.instances : coalesce(instance.image, var.image)
+  ])
+
+  source_image  = each.value
   aliases       = null
-  source_remote = var.source_remote
+  source_remote = var.remote
 }
 
 data "utils_deep_merge_yaml" "merged_cloud_init" {
@@ -20,7 +24,7 @@ resource "lxd_instance" "instance" {
   for_each = { for instance in var.instances : instance.computer_title => instance }
 
   name  = each.value.computer_title
-  image = lxd_cached_image.series.fingerprint
+  image = lxd_cached_image.image_name[coalesce(each.value.image, var.image)].fingerprint
   type  = var.instance_type
 
   config = merge(var.lxd_config, {
