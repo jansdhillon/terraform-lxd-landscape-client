@@ -1,3 +1,7 @@
+resource "terraform_data" "image_type_trigger" {
+  input = var.instance_type
+}
+
 resource "lxd_cached_image" "image_name" {
   for_each = toset([
     for instance in var.instances :
@@ -7,10 +11,11 @@ resource "lxd_cached_image" "image_name" {
   ])
   source_image  = each.key
   source_remote = var.remote
-  aliases       = []
-
+  type          = var.instance_type
+  
   lifecycle {
-    ignore_changes = [aliases]
+    ignore_changes       = [aliases]
+    replace_triggered_by = [terraform_data.image_type_trigger]
   }
 }
 
