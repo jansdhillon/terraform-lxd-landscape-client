@@ -4,7 +4,7 @@ resource "lxd_cached_image" "image_name" {
   }
 
   source_image  = each.value.image
-  aliases       = each.value.is_alias ? [each.value.image] : null
+  aliases       = null
   source_remote = var.remote
 }
 
