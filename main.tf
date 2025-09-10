@@ -1,17 +1,13 @@
 resource "lxd_cached_image" "image_name" {
-  for_each = {
-    for instance in var.instances : instance.computer_title => {
-      image = coalesce(
-        instance.image_alias,
-        instance.fingerprint,
-        var.image_alias,
-        var.fingerprint
-      )
-    }
-  }
-
-  source_image  = each.value.image
+  for_each = toset([
+    for instance in var.instances :
+    instance.image_alias != null ? instance.image_alias :
+    instance.fingerprint != null ? instance.fingerprint :
+    var.image_alias != null ? var.image_alias : var.fingerprint
+  ])
+  source_image  = each.key
   source_remote = var.remote
+  aliases       = []
 
   lifecycle {
     ignore_changes = [aliases]
@@ -33,9 +29,13 @@ data "utils_deep_merge_yaml" "merged_cloud_init" {
 resource "lxd_instance" "instance" {
   for_each = { for instance in var.instances : instance.computer_title => instance }
 
-  name  = each.value.computer_title
-  image = lxd_cached_image.image_name[each.key].fingerprint
-  type  = var.instance_type
+  name = each.value.computer_title
+  image = lxd_cached_image.image_name[
+    each.value.image_alias != null ? each.value.image_alias :
+    each.value.fingerprint != null ? each.value.fingerprint :
+    var.image_alias != null ? var.image_alias : var.fingerprint
+  ].fingerprint
+  type = var.instance_type
 
   config = merge(var.lxd_config, {
     "user.user-data" = each.value.additional_cloud_init != null ? "#cloud-config\n${data.utils_deep_merge_yaml.merged_cloud_init[each.key].output}" : local.cloud_init_configs[each.key]
