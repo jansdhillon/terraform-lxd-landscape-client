@@ -9,16 +9,13 @@ resource "terraform_data" "cloud_init_trigger" {
   input = each.value.additional_cloud_init != null ? data.utils_deep_merge_yaml.merged_cloud_init[each.key].output : local.cloud_init_configs[each.key]
 }
 
+
 resource "lxd_cached_image" "image_name" {
   for_each = toset([
     for instance in var.instances :
-    coalesce(
-      instance.image_alias,
-      instance.fingerprint,
-      instance.series,
-      var.image_alias,
-      var.fingerprint
-    )
+    instance.image_alias != null ? instance.image_alias :
+    instance.fingerprint != null ? instance.fingerprint :
+    var.image_alias != null ? var.image_alias : var.fingerprint
   ])
   source_image  = each.key
   source_remote = var.remote
@@ -51,13 +48,9 @@ resource "lxd_instance" "instance" {
 
   name = each.value.client_config.computer_title
   image = lxd_cached_image.image_name[
-    coalesce(
-      each.value.image_alias,
-      each.value.fingerprint,
-      each.value.series,
-      var.image_alias,
-      var.fingerprint
-    )
+    each.value.image_alias != null ? each.value.image_alias :
+    each.value.fingerprint != null ? each.value.fingerprint :
+    var.image_alias != null ? var.image_alias : var.fingerprint
   ].fingerprint
   type = var.instance_type
 
@@ -75,19 +68,47 @@ resource "lxd_instance" "instance" {
     }
   }
 
+  dynamic "file" {
+    for_each = each.value.file != null ? [each.value.file] : []
+    content {
+      content            = file.value.content
+      source_path        = file.value.source_path
+      target_path        = file.value.target_path
+      uid                = file.value.uid
+      gid                = file.value.gid
+      mode               = file.value.mode
+      create_directories = file.value.create_directories
+    }
+  }
+
   timeouts = {
     create = var.timeout
   }
 
-  execs = {
-    "wait_for_cloud_init" = {
-      command       = ["cloud-init", "status", "--wait"]
-      enabled       = var.wait_for_cloud_init
-      trigger       = "on_change"
-      record_output = true
-      fail_on_error = false
-    }
-  }
+  execs = merge(
+    {
+      "wait_for_cloud_init" = {
+        command       = ["cloud-init", "status", "--wait"]
+        enabled       = var.wait_for_cloud_init
+        trigger       = "on_change"
+        record_output = true
+        fail_on_error = false
+      }
+    },
+    each.value.execs != null ? {
+      "user_exec" = {
+        command       = each.value.execs.command
+        enabled       = each.value.execs.enabled
+        trigger       = each.value.execs.trigger
+        environment   = each.value.execs.environment
+        working_dir   = each.value.execs.working_dir
+        record_output = each.value.execs.record_output
+        fail_on_error = each.value.execs.fail_on_error
+        uid           = each.value.execs.uid
+        gid           = each.value.execs.gid
+      }
+    } : {}
+  )
 
   lifecycle {
     replace_triggered_by = [terraform_data.cloud_init_trigger[each.key]]

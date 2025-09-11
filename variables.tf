@@ -63,7 +63,6 @@ variable "instances" {
     })
     fingerprint           = optional(string)
     image_alias           = optional(string)
-    series                = optional(string)
     fqdn                  = optional(string)
     http_proxy            = optional(string)
     https_proxy           = optional(string)
@@ -73,13 +72,42 @@ variable "instances" {
       type       = string
       properties = map(string)
     }))
+    execs = optional(object({
+      command       = list(string)
+      enabled       = optional(bool, true)
+      trigger       = optional(string, "on_change")
+      environment   = optional(map(string))
+      working_dir   = optional(string)
+      record_output = optional(bool, false)
+      fail_on_error = optional(bool, false)
+      uid           = optional(number, 0)
+      gid           = optional(number, 0)
+    }))
+    file = optional(object({
+      content            = optional(string)
+      source_path        = optional(string)
+      target_path        = string
+      uid                = optional(number)
+      gid                = optional(number)
+      mode               = optional(string, "0755")
+      create_directories = optional(bool, false)
+    }))
   }))
 
   validation {
-    condition = var.fingerprint != null || var.image_alias != null || alltrue([
-      for instance in var.instances : instance.fingerprint != null || instance.image_alias != null || instance.series != null
+    condition = alltrue([
+      for instance in var.instances : instance.file == null || (
+        (instance.file.content != null) != (instance.file.source_path != null)
+      ) if instance.file != null
     ])
-    error_message = "Either var.fingerprint or var.image_alias must be set, or all instances must specify a fingerprint, image_alias, or series."
+    error_message = "File must specify either content or source_path, but not both."
+  }
+
+  validation {
+    condition = var.fingerprint != null || var.image_alias != null || alltrue([
+      for instance in var.instances : instance.fingerprint != null || instance.image_alias != null
+    ])
+    error_message = "Either var.fingerprint or var.image_alias must be set, or all instances must specify a fingerprint or image_alias."
   }
 }
 
