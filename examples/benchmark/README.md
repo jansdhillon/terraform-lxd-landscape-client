@@ -20,14 +20,14 @@ This example demonstrates how to use the `terraform-lxd-landscape-client` module
 cp terraform.tfvars.example terraform.tfvars
 ```
 
-1. Initialize and apply:
+2. Initialize and apply:
 
 ```sh
 terraform init
 terraform apply -auto-approve
 ```
 
-1. View benchmark results:
+3. View benchmark results:
 
 > [!IMPORTANT]
 > The result file will only be created when package reporter runs, so wait about a minute after the clients register before checking `result.txt`. If you did not enable autoregistration on Landscape Server, you will need to manually accept the pending clients before the results will be available.
@@ -42,7 +42,7 @@ lxc exec jammy-control -- cat /var/lib/landscape/client/result.txt
 
 ...
 
-```
+```text
 jammy proposed: 
 
 --------- Run on: 2025-09-11 21:52:34 ---------
