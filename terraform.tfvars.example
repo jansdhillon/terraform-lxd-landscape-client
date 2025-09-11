@@ -4,31 +4,41 @@ fqdn             = "landscape.example.com"
 registration_key = "key"
 
 instances = [
-
   {
-    image_alias           = "noble"
-    computer_title        = "ls-client"
+    image_alias = "jammy"
+    client_config = {
+      computer_title           = "proposed-tf"
+      ping_interval            = 10
+      exchange_interval        = 10
+      urgent_exchange_interval = 10
+    }
+
     additional_cloud_init = <<EOT
 #cloud-config
 apt:
   sources:
+    jammy-proposed:
+      source: "deb http://archive.ubuntu.com/ubuntu jammy-proposed main restricted universe multiverse"
     fish-ppa:
       source: "ppa:fish-shell/release-4"
+package-upgrades: true
 packages:
+  - python3-psutil
   - fish
-  - landscape-client
 users:
-  - name: ubuntu
-    shell: /usr/bin/fish
-    sudo: ALL=(ALL) NOPASSWD:ALL
+- name: ubuntu
+  shell: /usr/bin/fish
+  sudo: ALL=(ALL) NOPASSWD:ALL
+write_files:
+  - path: /etc/apt/preferences.d/proposed
+    content: |
+      Package: landscape-client landscape-common
+      Pin: release a=jammy-proposed
+      Pin-Priority: 600
+
+runcmd:
+  - echo "Additional runcmd from tfvars" > /tmp/test-merge.txt
 EOT
 
   },
-
-
-  {
-    image_alias    = "jammy"
-    computer_title = "ls-client2"
-  },
-
 ]

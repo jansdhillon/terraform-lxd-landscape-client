@@ -1,14 +1,16 @@
 #cloud-config
 apt:
+%{ if ppa != null && ppa != "" ~}
   sources:
     trunk-testing-ppa:
       source: ${ppa}
+%{ endif ~}
 packages:
   - landscape-client
 ubuntu_pro:
   token: ${pro_token}
 write_files:
-  - path: /etc/landscape/client.conf
+  - path: ${instance_landscape_config_path}
     content: |
       ${indent(6, conf_content)}
 runcmd:

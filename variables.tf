@@ -38,28 +38,36 @@ variable "fqdn" {
 
 variable "instances" {
   type = set(object({
-    bus                     = optional(string, "session")
-    computer_title          = string
-    fingerprint             = optional(string)
-    image_alias             = optional(string)
-    account_name            = optional(string)
-    registration_key        = optional(string)
-    fqdn                    = optional(string)
-    data_path               = optional(string, "/var/lib/landscape/client")
-    http_proxy              = optional(string)
-    https_proxy             = optional(string)
-    log_dir                 = optional(string, "/var/log/landscape")
-    log_level               = optional(string, "info")
-    pid_file                = optional(string, "/var/run/landscape-client.pid")
-    ping_url                = optional(string)
-    include_manager_plugins = optional(string, "ScriptExecution")
-    include_monitor_plugins = optional(string, "ALL")
-    script_users            = optional(string, "landscape,root")
-    ssl_public_key          = optional(string, "/etc/landscape/server.pem")
-    tags                    = optional(string, "")
-    url                     = optional(string)
-    package_hash_id_url     = optional(string)
-    additional_cloud_init   = optional(string)
+    client_config = object({
+      account_name             = optional(string)
+      access_group             = optional(string)
+      bus                      = optional(string)
+      computer_title           = string
+      registration_key         = optional(string)
+      data_path                = optional(string)
+      log_dir                  = optional(string)
+      log_level                = optional(string)
+      pid_file                 = optional(string)
+      ping_url                 = optional(string)
+      include_manager_plugins  = optional(string)
+      include_monitor_plugins  = optional(string)
+      script_users             = optional(string)
+      ssl_public_key           = optional(string)
+      tags                     = optional(string)
+      url                      = optional(string)
+      package_hash_id_url      = optional(string)
+      exchange_interval        = optional(number)
+      urgent_exchange_interval = optional(number)
+      ping_interval            = optional(number)
+
+    })
+    fingerprint           = optional(string)
+    image_alias           = optional(string)
+    series                = optional(string)
+    fqdn                  = optional(string)
+    http_proxy            = optional(string)
+    https_proxy           = optional(string)
+    additional_cloud_init = optional(string)
     device = optional(object({
       name       = string
       type       = string
@@ -68,20 +76,10 @@ variable "instances" {
   }))
 
   validation {
-    condition = alltrue([
-      for instance in var.instances :
-      instance.additional_cloud_init == null ||
-      can(yamldecode(instance.additional_cloud_init)) &&
-      contains(try(yamldecode(instance.additional_cloud_init).packages, []), "landscape-client")
-    ])
-    error_message = "When additional_cloud_init is provided, it must include 'landscape-client' in the packages list."
-  }
-
-  validation {
     condition = var.fingerprint != null || var.image_alias != null || alltrue([
-      for instance in var.instances : instance.fingerprint != null || instance.image_alias != null
+      for instance in var.instances : instance.fingerprint != null || instance.image_alias != null || instance.series != null
     ])
-    error_message = "Either var.fingerprint or var.image_alias must be set, or all instances must specify a fingerprint or image_alias."
+    error_message = "Either var.fingerprint or var.image_alias must be set, or all instances must specify a fingerprint, image_alias, or series."
   }
 }
 
@@ -127,8 +125,8 @@ variable "profiles" {
 
 variable "ppa" {
   type        = string
-  default     = "ppa:landscape/self-hosted-beta"
   description = "PPA for Landscape client installation"
+  default     = null
 }
 
 variable "fingerprint" {
