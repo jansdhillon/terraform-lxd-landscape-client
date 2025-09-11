@@ -14,16 +14,8 @@ instances = [
     }
 
     file = {
-      source_path = "/home/ubuntu/terraform-lxd-landscape-client/benchmark_patch.py"
+      source_path = "./benchmark_patch.py"
       target_path = "/tmp/benchmark_patch.py"
-    }
-
-    execs = {
-      command       = ["python3", "/tmp/benchmark_patch.py"]
-      enabled       = true
-      trigger       = "once"
-      record_output = true
-      fail_on_error = false
     }
 
     additional_cloud_init = <<EOT
@@ -41,8 +33,9 @@ write_files:
       Package: landscape-client landscape-common
       Pin: release a=jammy-proposed
       Pin-Priority: 600
+runcmd:
+  - python3 /tmp/benchmark_patch.py
 EOT
-
   },
 
   {
@@ -55,16 +48,8 @@ EOT
     }
 
     file = {
-      source_path = "/home/ubuntu/terraform-lxd-landscape-client/benchmark_patch.py"
+      source_path = "./benchmark_patch.py"
       target_path = "/tmp/benchmark_patch.py"
-    }
-
-    execs = {
-      command       = ["python3", "/tmp/benchmark_patch.py"]
-      enabled       = true
-      trigger       = "once"
-      record_output = true
-      fail_on_error = false
     }
 
     additional_cloud_init = <<EOT
@@ -72,7 +57,8 @@ EOT
 package-upgrades: true
 packages:
   - python3-psutil
+runcmd:
+  - python3 /tmp/benchmark_patch.py
 EOT
-
   }
 ]

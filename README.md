@@ -1,6 +1,6 @@
 # terraform-lxd-landscape-client
 
-See `terraform.tfvars.example` for an example config. Get a pro token from <https://ubuntu.com/pro/dashboard>.
+You need an Ubuntu Pro token to deploy this module, which you can get from <https://ubuntu.com/pro/dashboard>.
 
 ## Usage
 
@@ -12,4 +12,47 @@ terraform init
 terraform apply -auto-approve
 ```
 
-See an example of how this module can be used in a [Landscape Demo](https://github.com/jansdhillon/landscape-demo/blob/81534b74a7ede9b07a3532106768c720d8145531/client/main.tf#L1).
+## Examples
+
+See [`examples/benchmark`](./examples/benchmark/) for an example application of this module.
+
+Additionally, see how this module can be used in a [Landscape Demo](https://github.com/jansdhillon/landscape-demo/blob/main/client/main.tf).
+
+### Basic Usage
+
+```hcl
+module "landscape-client" {
+  source  = "jansdhillon/landscape-client/lxd"
+  pro_token = "my-pro-token"
+  account_name = "standalone"
+  registration_key = "mykey"
+  fqdn = "landscape.example.com"
+
+  instances = [
+    {
+      client_config = {
+        computer_title = "client-0"
+      }
+      image_alias = "noble"
+      additional_cloud_init = <<EOT
+      #cloud-config
+      apt:
+        sources:
+          fish-ppa:
+            source: "ppa:fish-shell/release-4"
+
+      package-upgrades: true
+      packages:
+        - fish
+      users:
+      - name: ubuntu
+        shell: /usr/bin/fish
+        sudo: ALL=(ALL) NOPASSWD:ALL
+      runcmd:
+        - echo 'hello'
+      EOT
+    }
+  ]
+  
+}
+```

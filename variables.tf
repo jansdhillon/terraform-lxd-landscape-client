@@ -23,6 +23,7 @@ variable "instance_landscape_server_ssl_public_key_path" {
 variable "registration_key" {
   type     = string
   nullable = true
+  default = ""
 }
 
 variable "account_name" {
