@@ -23,7 +23,6 @@ resource "lxd_cached_image" "image_name" {
   source_image  = each.key
   source_remote = var.remote
   type          = var.instance_type
-  aliases       = []
 
   lifecycle {
     ignore_changes       = [aliases]
