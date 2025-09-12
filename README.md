@@ -4,22 +4,6 @@ You need an Ubuntu Pro token to deploy this module, which you can get from <http
 
 ## Usage
 
-```sh
-terraform init
-```
-
-```sh
-terraform apply -auto-approve
-```
-
-## Examples
-
-See [`examples`](https://github.com/jansdhillon/terraform-lxd-landscape-client/tree/main/examples) for example applications of this module.
-
-Additionally, see how this module can be used in a [Landscape Demo](https://github.com/jansdhillon/landscape-demo/blob/main/client/main.tf).
-
-### Basic Usage
-
 ```hcl
 module "landscape-client" {
   source  = "jansdhillon/landscape-client/lxd"
@@ -33,7 +17,16 @@ module "landscape-client" {
       client_config = {
         computer_title = "client-0"
       }
+
+      image_alias = "jammy"
+    },
+    {
+      client_config = {
+        computer_title = "client-1"
+      }
+
       image_alias = "noble"
+
       additional_cloud_init = <<EOT
       #cloud-config
       apt:
@@ -48,11 +41,29 @@ module "landscape-client" {
       - name: ubuntu
         shell: /usr/bin/fish
         sudo: ALL=(ALL) NOPASSWD:ALL
-      runcmd:
-        - echo 'hello'
       EOT
+
+      files = [
+        {
+          source_path = "./my_script.py"
+          target_path = "/tmp/my_script.py"
+        }
+      ]
+
+      execs = [
+        {
+          name    = "say_hello"
+          command = ["echo", "hello"]
+        }
+      ]
     }
   ]
   
 }
 ```
+
+### Examples
+
+See [`examples`](https://github.com/jansdhillon/terraform-lxd-landscape-client/tree/main/examples) for example applications of this module.
+
+Additionally, see how this module can be used in a [Landscape Demo](https://github.com/jansdhillon/landscape-demo/blob/main/client/main.tf).

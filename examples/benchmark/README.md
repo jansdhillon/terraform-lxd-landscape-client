@@ -1,13 +1,13 @@
 # Landscape Client Package Reporter Benchmark
 
-This example demonstrates how to use the `terraform-lxd-landscape-client` module by benchmarking different versions of Landscape Client and validating [an SRU](https://bugs.launchpad.net/landscape-client/+bug/2099283).
+This example demonstrates how to use the `terraform-lxd-landscape-client` module by benchmarking different versions of Landscape Client and validating the performance improvements of [an SRU](https://bugs.launchpad.net/landscape-client/+bug/2099283).
 
 [`benchmark_patch.py`](./benchmark_patch.py) instruments the `_compute_packages_changes` function in both Landscape Client instances to apply the profiling from the SRU Test Plan.
 
 ## Prereqs
 
 - LXD installed and configured
-- Terraform or OpenTofu
+- Terraform installed
 - Registration information for a Landscape Server account
 - An Ubuntu Pro token
 - Autoregistration enabled on Landscape Server
@@ -30,7 +30,7 @@ terraform apply -auto-approve
 3. View benchmark results:
 
 ```sh
-printf "jammy-lp2099283-proposed: \n"
+printf "\njammy-lp2099283-proposed: \n"
 lxc exec jammy-lp2099283-proposed -- cat /var/lib/landscape/client/result.txt
 
 printf "\njammy-lp2099283-control (currently in archives): \n"
@@ -88,6 +88,8 @@ jammy-lp2099283-control (currently in archives):
 
 CPU Time: 28.35s
 ```
+
+In this example, we see an almost 10x improvement, similar to that reported in the original test plan.
 
 ## Cleanup
 

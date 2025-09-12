@@ -7,7 +7,7 @@ image_alias = "jammy"
 instances = [
   {
     client_config = {
-      computer_title           = "jammy-proposed"
+      computer_title           = "jammy-lp2099283-proposed"
       ping_interval            = 10
       exchange_interval        = 10
       urgent_exchange_interval = 10
@@ -45,7 +45,7 @@ instances = [
   },
   {
     client_config = {
-      computer_title           = "jammy-control"
+      computer_title           = "jammy-lp2099283-control"
       ping_interval            = 10
       exchange_interval        = 10
       urgent_exchange_interval = 10

@@ -5,7 +5,7 @@ This example demonstrates how to use the `terraform-lxd-landscape-client` module
 ## Prereqs
 
 - LXD installed and configured
-- Terraform or OpenTofu
+- Terraform installed
 - Registration information for a Landscape Server account
 - An Ubuntu Pro token
 - Autoregistration enabled on Landscape Server
@@ -28,21 +28,34 @@ terraform apply -auto-approve
 3. View results:
 
 ```sh
-printf "jammy-lp2031036-proposed: \n"
-lxc exec jammy-lp2031036-proposed -- cat /tmp/landscape/value-error-result.txt
+printf "\njammy-lp2031036-proposed: \n"
+lxc exec jammy-lp2031036-proposed -- sh -c '\
+if [ -s /tmp/landscape/value-error-result.txt ]; then \
+    cat /tmp/landscape/value-error-result.txt; \
+else \
+    echo "No errors!"; \
+fi'
 
 printf "\njammy-lp2031036-control (currently in archives): \n"
-lxc exec jammy-lp2031036-control -- cat /tmp/landscape/value-error-result.txt
+lxc exec jammy-lp2031036-control -- sh -c '\
+if [ -s /tmp/landscape/value-error-result.txt ]; then \
+    cat /tmp/landscape/value-error-result.txt; \
+else \
+    echo "No errors!"; \
+fi'
 ```
 
 ...
 
 ```text
 jammy-lp2031036-proposed: 
+No errors!
 
 jammy-lp2031036-control (currently in archives):
 ValueError: too many values to unpack (expected 5)
 ```
+
+As we can see from the error outputs, the bug has been fixed in the proposed version.
 
 ## Cleanup
 
