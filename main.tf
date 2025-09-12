@@ -60,7 +60,7 @@ resource "lxd_instance" "instance" {
 
 
   dynamic "device" {
-    for_each = each.value.device != null ? [each.value.device] : []
+    for_each = each.value.devices != null ? each.value.devices : []
     content {
       name       = device.value.name
       type       = device.value.type
@@ -69,7 +69,7 @@ resource "lxd_instance" "instance" {
   }
 
   dynamic "file" {
-    for_each = each.value.file != null ? [each.value.file] : []
+    for_each = each.value.files != null ? each.value.files : []
     content {
       content            = file.value.content
       source_path        = file.value.source_path
@@ -95,19 +95,19 @@ resource "lxd_instance" "instance" {
         fail_on_error = false
       }
     },
-    each.value.execs != null ? {
-      "user_exec" = {
-        command       = each.value.execs.command
-        enabled       = each.value.execs.enabled
-        trigger       = each.value.execs.trigger
-        environment   = each.value.execs.environment
-        working_dir   = each.value.execs.working_dir
-        record_output = each.value.execs.record_output
-        fail_on_error = each.value.execs.fail_on_error
-        uid           = each.value.execs.uid
-        gid           = each.value.execs.gid
+    {
+      for exec in (each.value.execs != null ? each.value.execs : []) : exec.name => {
+        command       = exec.command
+        enabled       = exec.enabled
+        trigger       = exec.trigger
+        environment   = exec.environment
+        working_dir   = exec.working_dir
+        record_output = exec.record_output
+        fail_on_error = exec.fail_on_error
+        uid           = exec.uid
+        gid           = exec.gid
       }
-    } : {}
+    }
   )
 
   lifecycle {

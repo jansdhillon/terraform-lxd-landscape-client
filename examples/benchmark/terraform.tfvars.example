@@ -13,10 +13,12 @@ instances = [
       urgent_exchange_interval = 10
     }
 
-    file = {
-      source_path = "./benchmark_patch.py"
-      target_path = "/tmp/benchmark_patch.py"
-    }
+    files = [
+      {
+        source_path = "./benchmark_patch.py"
+        target_path = "/tmp/benchmark_patch.py"
+      }
+    ]
 
     additional_cloud_init = <<EOT
 #cloud-config
@@ -47,10 +49,12 @@ EOT
       urgent_exchange_interval = 10
     }
 
-    file = {
-      source_path = "./benchmark_patch.py"
-      target_path = "/tmp/benchmark_patch.py"
-    }
+    files = [
+      {
+        source_path = "./benchmark_patch.py"
+        target_path = "/tmp/benchmark_patch.py"
+      }
+    ]
 
     additional_cloud_init = <<EOT
 #cloud-config

@@ -2,7 +2,7 @@
 apt:
 %{ if ppa != null && ppa != "" ~}
   sources:
-    trunk-testing-ppa:
+    landscape_ppa:
       source: ${ppa}
 %{ endif ~}
 packages:

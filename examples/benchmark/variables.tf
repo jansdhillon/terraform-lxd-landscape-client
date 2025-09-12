@@ -25,14 +25,19 @@ variable "instances" {
     image_alias = string
     client_config = object({
       computer_title           = string
-      ping_interval            = number
-      exchange_interval        = number
-      urgent_exchange_interval = number
+      ping_interval            = optional(number)
+      exchange_interval        = optional(number)
+      urgent_exchange_interval = optional(number)
     })
-    file = object({
-      source_path = string
-      target_path = string
-    })
-    additional_cloud_init = string
+    files = optional(list(object({
+      content            = optional(string)
+      source_path        = optional(string)
+      target_path        = string
+      uid                = optional(number)
+      gid                = optional(number)
+      mode               = optional(string, "0755")
+      create_directories = optional(bool, false)
+    })), [])
+    additional_cloud_init = optional(string)
   }))
 }

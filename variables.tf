@@ -23,7 +23,7 @@ variable "instance_landscape_server_ssl_public_key_path" {
 variable "registration_key" {
   type     = string
   nullable = true
-  default = ""
+  default  = ""
 }
 
 variable "account_name" {
@@ -68,12 +68,13 @@ variable "instances" {
     http_proxy            = optional(string)
     https_proxy           = optional(string)
     additional_cloud_init = optional(string)
-    device = optional(object({
+    devices = optional(list(object({
       name       = string
       type       = string
       properties = map(string)
-    }))
-    execs = optional(object({
+    })), [])
+    execs = optional(list(object({
+      name          = string
       command       = list(string)
       enabled       = optional(bool, true)
       trigger       = optional(string, "on_change")
@@ -83,8 +84,8 @@ variable "instances" {
       fail_on_error = optional(bool, false)
       uid           = optional(number, 0)
       gid           = optional(number, 0)
-    }))
-    file = optional(object({
+    })), [])
+    files = optional(list(object({
       content            = optional(string)
       source_path        = optional(string)
       target_path        = string
@@ -92,17 +93,8 @@ variable "instances" {
       gid                = optional(number)
       mode               = optional(string, "0755")
       create_directories = optional(bool, false)
-    }))
+    })), [])
   }))
-
-  validation {
-    condition = alltrue([
-      for instance in var.instances : instance.file == null || (
-        (instance.file.content != null) != (instance.file.source_path != null)
-      ) if instance.file != null
-    ])
-    error_message = "File must specify either content or source_path, but not both."
-  }
 
   validation {
     condition = var.fingerprint != null || var.image_alias != null || alltrue([
@@ -118,14 +110,6 @@ variable "cloud_init_path" {
 }
 
 
-variable "device" {
-  type = object({
-    name       = string
-    type       = string
-    properties = map(string)
-  })
-  default = null
-}
 
 variable "ephemeral" {
   type    = bool
@@ -145,11 +129,6 @@ variable "instance_type" {
 variable "pro_token" {
   type        = string
   description = "Ubuntu Pro token"
-}
-
-variable "profiles" {
-  type    = list(string)
-  default = null
 }
 
 variable "ppa" {

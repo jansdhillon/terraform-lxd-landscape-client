@@ -1,5 +1,5 @@
 module "landscape-client-benchmark" {
-  source  = "jansdhillon/landscape-client/lxd"
+  source = "../.."
 
   pro_token        = var.pro_token
   account_name     = var.account_name
