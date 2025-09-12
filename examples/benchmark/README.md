@@ -10,7 +10,7 @@ This example demonstrates how to use the `terraform-lxd-landscape-client` module
 - Terraform or OpenTofu
 - Registration information for a Landscape Server account
 - An Ubuntu Pro token
-- Recommended: Autoregistration enabled on Landscape Server
+- Autoregistration enabled on Landscape Server
 
 ## Running the plan
 
