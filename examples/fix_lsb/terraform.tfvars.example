@@ -1,0 +1,64 @@
+pro_token          = "my-pro-token"
+account_name       = "standalone"
+landscape_root_url = "landscape.example.com"
+registration_key   = "key"
+image_alias        = "jammy"
+
+instances = [
+  {
+    client_config = {
+      computer_title           = "jammy-lp2031036-proposed"
+      ping_interval            = 10
+      exchange_interval        = 10
+      urgent_exchange_interval = 10
+    }
+
+    landscape_client_package = "landscape-client=23.02-0ubuntu1~22.04.6"
+
+    files = [
+      {
+        content     = <<EOT
+        Package: landscape-client landscape-common
+        Pin: release a=jammy-proposed
+        Pin-Priority: 600
+        EOT
+        target_path = "/etc/apt/preferences.d/proposed"
+      }
+    ]
+
+    additional_cloud_init = <<EOT
+    #cloud-config
+    apt:
+        sources:
+            jammy-proposed:
+                source: "deb http://archive.ubuntu.com/ubuntu jammy-proposed main restricted universe multiverse"
+
+    package-upgrades: true
+    packages:
+    - lsb-core
+    runcmd:
+        - mkdir -p /tmp/landscape
+        - 'sleep 60 && grep "ValueError: too many values to unpack" /var/log/landscape/package-reporter.log > /tmp/landscape/value-error-result.txt'
+    EOT
+  },
+  {
+    client_config = {
+      computer_title           = "jammy-lp2031036-control"
+      ping_interval            = 10
+      exchange_interval        = 10
+      urgent_exchange_interval = 10
+    }
+
+    landscape_client_package = "landscape-client=23.02-0ubuntu1~22.04.4"
+
+    additional_cloud_init = <<EOT
+    #cloud-config
+    package-upgrades: true
+    packages:
+    - lsb-core
+    runcmd:
+        - mkdir -p /tmp/landscape
+        - 'sleep 60 && grep "ValueError: too many values to unpack" /var/log/landscape/package-reporter.log > /tmp/landscape/value-error-result.txt'
+    EOT
+  },
+]

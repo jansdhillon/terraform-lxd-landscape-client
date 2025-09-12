@@ -13,7 +13,17 @@ instances = [
       urgent_exchange_interval = 10
     }
 
+    landscape_client_package = "landscape-client=23.02-0ubuntu1~22.04.6"
+
     files = [
+      {
+        content     = <<EOT
+            Package: landscape-client landscape-common
+            Pin: release a=jammy-proposed
+            Pin-Priority: 600
+        EOT
+        target_path = "/etc/apt/preferences.d/proposed"
+      },
       {
         source_path = "./benchmark_patch.py"
         target_path = "/tmp/benchmark_patch.py"
@@ -21,25 +31,18 @@ instances = [
     ]
 
     additional_cloud_init = <<EOT
-#cloud-config
-apt:
-  sources:
-    jammy-proposed:
-      source: "deb http://archive.ubuntu.com/ubuntu jammy-proposed main restricted universe multiverse"
-package-upgrades: true
-packages:
-  - python3-psutil
-write_files:
-  - path: /etc/apt/preferences.d/proposed
-    content: |
-      Package: landscape-client landscape-common
-      Pin: release a=jammy-proposed
-      Pin-Priority: 600
-runcmd:
-  - python3 /tmp/benchmark_patch.py
-EOT
+    #cloud-config
+    apt:
+      sources:
+        jammy-proposed:
+          source: "deb http://archive.ubuntu.com/ubuntu jammy-proposed main restricted universe multiverse"
+    package-upgrades: true
+    packages:
+      - python3-psutil
+    runcmd:
+      - python3 /tmp/benchmark_patch.py && sleep 60
+    EOT
   },
-
   {
     client_config = {
       computer_title           = "jammy-control"
@@ -48,6 +51,8 @@ EOT
       urgent_exchange_interval = 10
     }
 
+    landscape_client_package = "landscape-client=23.02-0ubuntu1~22.04.4"
+
     files = [
       {
         source_path = "./benchmark_patch.py"
@@ -56,12 +61,12 @@ EOT
     ]
 
     additional_cloud_init = <<EOT
-#cloud-config
-package-upgrades: true
-packages:
-  - python3-psutil
-runcmd:
-  - python3 /tmp/benchmark_patch.py
-EOT
+    #cloud-config
+    package-upgrades: true
+    packages:
+      - python3-psutil
+    runcmd:
+      - python3 /tmp/benchmark_patch.py && sleep 60 
+    EOT
   }
 ]

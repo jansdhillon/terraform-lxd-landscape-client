@@ -29,6 +29,7 @@ locals {
       exchange_interval        = config.client_config.exchange_interval
       urgent_exchange_interval = config.client_config.urgent_exchange_interval
       ping_interval            = config.client_config.ping_interval
+      landscape_client_package = coalesce(config.landscape_client_package, var.landscape_client_package)
     }
   }
 
@@ -38,6 +39,7 @@ locals {
       landscape_root_url       = config.landscape_root_url
       landscape_config_content = templatefile("${path.module}/client.conf.tpl", config)
       landscape_config_path    = var.instance_landscape_config_path
+      landscape_client_package = config.landscape_client_package
       ppa                      = var.ppa
       ssl_public_key           = config.ssl_public_key
       ssl_public_key_path      = var.instance_landscape_server_ssl_public_key_path

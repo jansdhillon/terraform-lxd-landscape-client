@@ -6,7 +6,7 @@ apt:
       source: ${ppa}
 %{ endif ~}
 packages:
-  - landscape-client
+  - ${landscape_client_package}
 ubuntu_pro:
   token: ${pro_token}
 write_files:

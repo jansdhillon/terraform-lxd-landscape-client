@@ -58,13 +58,14 @@ variable "instances" {
 
     })
 
-    fingerprint           = optional(string)
-    image_alias           = optional(string)
-    landscape_root_url    = optional(string)
-    http_proxy            = optional(string)
-    https_proxy           = optional(string)
-    additional_lxd_config = optional(map(string))
-    additional_cloud_init = optional(string)
+    fingerprint              = optional(string)
+    image_alias              = optional(string)
+    landscape_root_url       = optional(string)
+    landscape_client_package = optional(string)
+    http_proxy               = optional(string)
+    https_proxy              = optional(string)
+    additional_lxd_config    = optional(map(string))
+    additional_cloud_init    = optional(string)
     devices = optional(list(object({
       name       = string
       type       = string
@@ -121,6 +122,12 @@ variable "ppa" {
   type        = string
   description = "PPA for Landscape client installation"
   default     = null
+}
+
+variable "landscape_client_package" {
+  type        = string
+  description = "Landscape client package specification (ex. `landscape-client` or `landscape-client=23.02-0ubuntu1~22.04.5`)"
+  default     = "landscape-client"
 }
 
 variable "fingerprint" {

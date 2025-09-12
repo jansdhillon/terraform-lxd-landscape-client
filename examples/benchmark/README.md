@@ -1,4 +1,4 @@
-# Landscape Client Benchmark Example
+# Landscape Client Package Reporter Benchmark
 
 This example demonstrates how to use the `terraform-lxd-landscape-client` module by benchmarking different versions of Landscape Client and validating [an SRU](https://bugs.launchpad.net/landscape-client/+bug/2099283).
 
@@ -29,21 +29,18 @@ terraform apply -auto-approve
 
 3. View benchmark results:
 
-> [!IMPORTANT]
-> The result file will only be created when package reporter runs, so wait about a minute after the clients register before checking `result.txt`. If you did not enable autoregistration on Landscape Server, you will need to manually accept the pending clients before the results will be available.
-
 ```sh
-printf "jammy proposed: \n"
-lxc exec jammy-proposed -- cat /var/lib/landscape/client/result.txt
+printf "jammy-lp2099283-proposed: \n"
+lxc exec jammy-lp2099283-proposed -- cat /var/lib/landscape/client/result.txt
 
-printf "\njammy control (currently in archives): \n"
-lxc exec jammy-control -- cat /var/lib/landscape/client/result.txt
+printf "\njammy-lp2099283-control (currently in archives): \n"
+lxc exec jammy-lp2099283-control -- cat /var/lib/landscape/client/result.txt
 ```
 
 ...
 
 ```text
-jammy proposed: 
+jammy-lp2099283-propsed:
 
 --------- Run on: 2025-09-11 21:52:34 ---------
 
@@ -67,7 +64,7 @@ jammy proposed:
 
 CPU Time: 2.86s
 
-jammy control (currently in archives): 
+jammy-lp2099283-control (currently in archives): 
 
 --------- Run on: 2025-09-11 21:52:49 ---------
 

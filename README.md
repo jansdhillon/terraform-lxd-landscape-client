@@ -14,7 +14,7 @@ terraform apply -auto-approve
 
 ## Examples
 
-See [`examples/benchmark`](./examples/benchmark/) for an example application of this module.
+See [`examples`](https://github.com/jansdhillon/terraform-lxd-landscape-client/tree/main/examples) for example applications of this module.
 
 Additionally, see how this module can be used in a [Landscape Demo](https://github.com/jansdhillon/landscape-demo/blob/main/client/main.tf).
 
