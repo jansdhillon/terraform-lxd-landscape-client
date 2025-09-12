@@ -11,6 +11,7 @@ module "landscape-client" {
   account_name = "standalone"
   registration_key = "mykey"
   landscape_root_url = "landscape.example.com"
+  ppa = "ppa:landscape/self-hosted-beta"
 
   instances = [
     {

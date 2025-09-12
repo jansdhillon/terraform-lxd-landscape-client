@@ -119,14 +119,13 @@ variable "pro_token" {
 }
 
 variable "ppa" {
-  type        = string
-  description = "PPA for Landscape client installation"
-  default     = null
+  type    = string
+  default = null
 }
 
 variable "landscape_client_package" {
   type        = string
-  description = "Landscape client package specification (ex. `landscape-client` or `landscape-client=23.02-0ubuntu1~22.04.5`)"
+  description = "Landscape Client debian package to install (ex. `landscape-client` or `landscape-client=23.02-0ubuntu1~22.04.5`)"
   default     = "landscape-client"
 }
 
