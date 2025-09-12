@@ -16,6 +16,7 @@ module "landscape-client" {
     {
       client_config = {
         computer_title = "client-0"
+        log_level = "debug"
       }
 
       image_alias = "jammy"
@@ -26,22 +27,6 @@ module "landscape-client" {
       }
 
       image_alias = "noble"
-
-      additional_cloud_init = <<EOT
-      #cloud-config
-      apt:
-        sources:
-          fish-ppa:
-            source: "ppa:fish-shell/release-4"
-
-      package-upgrades: true
-      packages:
-        - fish
-      users:
-      - name: ubuntu
-        shell: /usr/bin/fish
-        sudo: ALL=(ALL) NOPASSWD:ALL
-      EOT
 
       files = [
         {
@@ -56,9 +41,27 @@ module "landscape-client" {
           command = ["echo", "hello"]
         }
       ]
+
+      additional_cloud_init = <<EOT
+      #cloud-config
+      apt:
+        sources:
+          fish-ppa:
+            source: "ppa:fish-shell/release-4"
+
+      package-upgrades: true
+      packages:
+        - fish
+      users:
+        - name: ubuntu
+          shell: /usr/bin/fish
+          sudo: ALL=(ALL) NOPASSWD:ALL
+      runcmd:
+        - python3 /tmp/my_script.py
+      EOT
     }
   ]
-  
+
 }
 ```
 
