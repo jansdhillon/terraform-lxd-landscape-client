@@ -104,18 +104,6 @@ variable "instances" {
   }
 }
 
-variable "cloud_init_path" {
-  type    = string
-  default = null
-}
-
-
-
-variable "ephemeral" {
-  type    = bool
-  default = false
-}
-
 variable "instance_type" {
   type    = string
   default = "container"
@@ -129,6 +117,7 @@ variable "instance_type" {
 variable "pro_token" {
   type        = string
   description = "Ubuntu Pro token"
+  sensitive   = true
 }
 
 variable "ppa" {
@@ -162,5 +151,5 @@ variable "wait_for_cloud_init" {
 variable "timeout" {
   type        = string
   description = "duration string to wait for instances to deploy"
-  default     = "30m"
+  default     = "10m"
 }
