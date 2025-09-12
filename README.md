@@ -26,7 +26,7 @@ module "landscape-client" {
   pro_token = "my-pro-token"
   account_name = "standalone"
   registration_key = "mykey"
-  fqdn = "landscape.example.com"
+  landscape_root_url = "landscape.example.com"
 
   instances = [
     {

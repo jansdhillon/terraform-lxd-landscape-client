@@ -39,7 +39,6 @@ data "utils_deep_merge_yaml" "merged_cloud_init" {
   ]
 
   append_list = true
-  #deep_copy_list = true
 
 }
 
@@ -54,9 +53,12 @@ resource "lxd_instance" "instance" {
   ].fingerprint
   type = var.instance_type
 
-  config = merge(var.lxd_config, {
-    "user.user-data" = each.value.additional_cloud_init != null ? "#cloud-config\n${data.utils_deep_merge_yaml.merged_cloud_init[each.key].output}" : local.cloud_init_configs[each.key]
-  })
+  config = merge(
+    {
+      "user.user-data" = each.value.additional_cloud_init != null ? "#cloud-config\n${data.utils_deep_merge_yaml.merged_cloud_init[each.key].output}" : local.cloud_init_configs[each.key]
+    },
+    each.value.additional_lxd_config != null ? each.value.additional_lxd_config : {}
+  )
 
 
   dynamic "device" {
@@ -96,7 +98,7 @@ resource "lxd_instance" "instance" {
       }
     },
     {
-      for exec in (each.value.execs != null ? each.value.execs : []) : exec.name => {
+      for exec in(each.value.execs != null ? each.value.execs : []) : exec.name => {
         command       = exec.command
         enabled       = exec.enabled
         trigger       = exec.trigger

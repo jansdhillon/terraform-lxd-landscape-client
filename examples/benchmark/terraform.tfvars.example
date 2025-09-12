@@ -1,11 +1,11 @@
 pro_token        = "my-pro-token"
 account_name     = "standalone"
-fqdn             = "landscape.example.com"
+landscape_root_url = "landscape.example.com"
 registration_key = "key"
+image_alias = "jammy"
 
 instances = [
   {
-    image_alias = "jammy"
     client_config = {
       computer_title           = "jammy-proposed"
       ping_interval            = 10
@@ -41,7 +41,6 @@ EOT
   },
 
   {
-    image_alias = "jammy"
     client_config = {
       computer_title           = "jammy-control"
       ping_interval            = 10

@@ -9,8 +9,8 @@ variable "account_name" {
   type        = string
 }
 
-variable "fqdn" {
-  description = "Landscape Server FQDN"
+variable "landscape_root_url" {
+  description = "Landscape Server root URL"
   type        = string
 }
 
@@ -22,7 +22,7 @@ variable "registration_key" {
 
 variable "instances" {
   type = set(object({
-    image_alias = string
+    image_alias = optional(string)
     client_config = object({
       computer_title           = string
       ping_interval            = optional(number)
@@ -40,4 +40,10 @@ variable "instances" {
     })), [])
     additional_cloud_init = optional(string)
   }))
+}
+
+variable "image_alias" {
+  type        = string
+  default     = null
+  description = "Default alias of image. Can be overridden per instance. Takes precedence over fingerprint if both are specified."
 }

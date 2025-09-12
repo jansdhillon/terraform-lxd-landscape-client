@@ -4,11 +4,6 @@ variable "architecture" {
   description = "CPU architecture"
 }
 
-variable "lxd_config" {
-  type    = map(string)
-  default = {}
-}
-
 variable "instance_landscape_config_path" {
   type        = string
   default     = "/etc/landscape/client.conf"
@@ -31,9 +26,9 @@ variable "account_name" {
   description = "Landscape Server account name"
 }
 
-variable "fqdn" {
+variable "landscape_root_url" {
   type        = string
-  description = "Landscape Server FQDN"
+  description = "Landscape Server root URL"
 }
 
 
@@ -62,11 +57,13 @@ variable "instances" {
       ping_interval            = optional(number)
 
     })
+
     fingerprint           = optional(string)
     image_alias           = optional(string)
-    fqdn                  = optional(string)
+    landscape_root_url    = optional(string)
     http_proxy            = optional(string)
     https_proxy           = optional(string)
+    additional_lxd_config = optional(map(string))
     additional_cloud_init = optional(string)
     devices = optional(list(object({
       name       = string
