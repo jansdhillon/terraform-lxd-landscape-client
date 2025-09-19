@@ -30,16 +30,12 @@ variable "instance_landscape_config_path" {
 variable "instance_landscape_server_ssl_public_key_path" {
   type    = string
   default = "/etc/landscape/server.pem"
+
 }
 
 variable "instance_type" {
   type    = string
   default = "container"
-
-  validation {
-    condition     = contains(["virtual-machine", "container"], var.instance_type)
-    error_message = "valid values are: virtual-machine, container"
-  }
 }
 
 variable "instances" {
@@ -110,6 +106,14 @@ variable "instances" {
       for instance in var.instances : instance.fingerprint != null || instance.image_alias != null
     ])
     error_message = "Either var.fingerprint or var.image_alias must be set, or all instances must specify a fingerprint or image_alias."
+  }
+
+  validation {
+    condition = alltrue([
+      for i in var.instances :
+      contains(["virtual-machine", "container"], coalesce(i.instance_type, var.instance_type))
+    ])
+    error_message = "valid values are: virtual-machine, container"
   }
 }
 
