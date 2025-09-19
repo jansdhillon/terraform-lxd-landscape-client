@@ -4,8 +4,5 @@ terraform {
     lxd = {
       source = "terraform-lxd/lxd"
     }
-    utils = {
-      source = "cloudposse/utils"
-    }
   }
 }
