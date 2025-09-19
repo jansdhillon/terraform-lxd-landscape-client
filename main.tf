@@ -1,32 +1,3 @@
-resource "terraform_data" "image_type_trigger" {
-  input = var.instance_type
-}
-
-
-resource "terraform_data" "cloud_init_trigger" {
-  for_each = { for instance in var.instances : instance.client_config.computer_title => instance }
-
-  input = each.value.additional_cloud_init != null ? data.utils_deep_merge_yaml.merged_cloud_init[each.key].output : local.cloud_init_configs[each.key]
-}
-
-
-resource "lxd_cached_image" "image_name" {
-  for_each = toset([
-    for instance in var.instances :
-    instance.image_alias != null ? instance.image_alias :
-    instance.fingerprint != null ? instance.fingerprint :
-    var.image_alias != null ? var.image_alias : var.fingerprint
-  ])
-  source_image  = each.key
-  source_remote = var.remote
-  type          = var.instance_type
-
-  lifecycle {
-    ignore_changes       = [aliases]
-    replace_triggered_by = [terraform_data.image_type_trigger]
-  }
-}
-
 data "utils_deep_merge_yaml" "merged_cloud_init" {
   for_each = {
     for instance in var.instances : instance.client_config.computer_title => instance
@@ -42,16 +13,39 @@ data "utils_deep_merge_yaml" "merged_cloud_init" {
 
 }
 
+
+resource "lxd_cached_image" "image_name" {
+  for_each = {
+    for instance in var.instances :
+    coalesce(instance.image_alias, instance.fingerprint, var.image_alias, var.fingerprint) => {
+      alias         = coalesce(instance.image_alias, var.image_alias)
+      fingerprint   = instance.fingerprint != null && instance.fingerprint != "" ? instance.fingerprint : var.fingerprint
+      instance_type = coalesce(instance.instance_type, var.instance_type)
+      remote        = coalesce(instance.remote, var.remote)
+    }...
+  }
+
+  source_image  = coalesce(each.value[0].alias, each.value[0].fingerprint)
+  source_remote = each.value[0].remote
+  type          = each.value[0].instance_type
+
+  aliases = compact([each.value[0].alias])
+}
+
+
+
 resource "lxd_instance" "instance" {
   for_each = { for instance in var.instances : instance.client_config.computer_title => instance }
 
   name = each.value.client_config.computer_title
+
   image = lxd_cached_image.image_name[
-    each.value.image_alias != null ? each.value.image_alias :
-    each.value.fingerprint != null ? each.value.fingerprint :
-    var.image_alias != null ? var.image_alias : var.fingerprint
+    coalesce(each.value.image_alias, each.value.fingerprint, var.image_alias, var.fingerprint)
   ].fingerprint
-  type = var.instance_type
+
+  profiles = compact(coalesce(each.value.profiles, var.profiles))
+
+  type = coalesce(each.value.instance_type, var.instance_type)
 
   config = merge(
     {
@@ -111,8 +105,4 @@ resource "lxd_instance" "instance" {
       }
     }
   )
-
-  lifecycle {
-    replace_triggered_by = [terraform_data.cloud_init_trigger[each.key]]
-  }
 }
