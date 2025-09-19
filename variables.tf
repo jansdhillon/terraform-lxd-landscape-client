@@ -21,12 +21,6 @@ variable "image_alias" {
   description = "Default alias of image. Can be overridden per instance. Takes precedence over fingerprint if both are specified."
 }
 
-variable "instance_landscape_config_path" {
-  type        = string
-  default     = "/etc/landscape/client.conf"
-  description = "where the Landscape Client config will be written in each instance"
-}
-
 variable "instance_landscape_server_ssl_public_key_path" {
   type    = string
   default = "/etc/landscape/server.pem"
@@ -62,23 +56,23 @@ variable "instances" {
       url                      = optional(string)
       urgent_exchange_interval = optional(number)
     })
-    additional_cloud_init = optional(string)
-    additional_lxd_config = optional(map(string))
+    lxd_config = optional(map(string))
     devices = optional(list(object({
       name       = string
       type       = string
       properties = map(string)
     })), [])
+    # NOTE: Scripts are run in alphabetical order. The setup script is 001-setup.
     execs = optional(list(object({
       name          = string
       command       = list(string)
       enabled       = optional(bool, true)
-      trigger       = optional(string, "on_change")
+      trigger       = optional(string, "on_change") # on_change, on_start, or once
       environment   = optional(map(string))
       working_dir   = optional(string)
       record_output = optional(bool, false)
       fail_on_error = optional(bool, false)
-      uid           = optional(number, 0)
+      uid           = optional(number, 0) # root
       gid           = optional(number, 0)
     })), [])
     files = optional(list(object({
@@ -90,15 +84,18 @@ variable "instances" {
       mode               = optional(string, "0755")
       create_directories = optional(bool, false)
     })), [])
-    fingerprint              = optional(string)
-    http_proxy               = optional(string)
-    https_proxy              = optional(string)
-    image_alias              = optional(string)
-    instance_type            = optional(string)
-    landscape_client_package = optional(string)
-    landscape_root_url       = optional(string)
-    profiles                 = optional(list(string))
-    remote                   = optional(string)
+    fingerprint                = optional(string)
+    http_proxy                 = optional(string)
+    https_proxy                = optional(string)
+    image_alias                = optional(string)
+    instance_type              = optional(string)
+    server_ssl_public_key_path = optional(string, "/etc/landscape/server.pem")
+    landscape_client_package   = optional(string)
+    landscape_root_url         = optional(string)
+    ppa                        = optional(string)
+    profiles                   = optional(list(string))
+    pro_token                  = optional(string)
+    remote                     = optional(string)
   }))
 
   validation {
@@ -161,9 +158,4 @@ variable "timeout" {
   type        = string
   description = "duration string to wait for instances to deploy"
   default     = "10m"
-}
-
-variable "wait_for_cloud_init" {
-  type    = bool
-  default = true
 }

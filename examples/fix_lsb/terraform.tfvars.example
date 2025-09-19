@@ -17,7 +17,7 @@ instances = [
 
     files = [
       {
-        content     = <<EOT
+        content     = <<-EOT
         Package: landscape-client landscape-common
         Pin: release a=jammy-proposed
         Pin-Priority: 600
