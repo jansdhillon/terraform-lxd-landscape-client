@@ -9,6 +9,7 @@ module "landscape-client" {
   source  = "jansdhillon/landscape-client/lxd"
   pro_token = "my-pro-token"
   account_name = "standalone"
+  registration_key = "mykey"
   landscape_root_url = "landscape.example.com"
   ppa = "ppa:landscape/self-hosted-beta"
 
