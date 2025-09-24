@@ -64,46 +64,63 @@ resource "lxd_instance" "instance" {
   }
 
   execs = merge(
-
     {
-      "001-setup" = {
+      "000-pro-attach" = {
+        command       = ["pro", "attach", coalesce(each.value.pro_token, var.pro_token)]
+        trigger       = "once"
+        record_output = true
+        fail_on_error = true
+      },
+      "001-add-ppa" = {
+        enabled       = length(compact([each.value.ppa, var.ppa])) > 0
+        command       = length(compact([each.value.ppa, var.ppa])) > 0 ? ["add-apt-repository", coalesce(each.value.ppa, var.ppa)] : [false]
+        trigger       = "once"
+        record_output = true
+        fail_on_error = true
+      }
+      "002-ssl-handshake" = {
         command = [
-          "/bin/bash",
-          "-c",
-          "${join(" && ", compact([
-            "pro attach ${coalesce(each.value.pro_token, var.pro_token)}",
-            (each.value.ppa != null && each.value.ppa != "" || var.ppa != null && var.ppa != "")
-            ? "add-apt-repository ${coalesce(each.value.ppa, var.ppa)}"
-            : null,
-            (each.value.client_config.ssl_public_key == null || each.value.client_config.ssl_public_key == "")
-            ? "echo | openssl s_client -connect ${coalesce(each.value.landscape_root_url, var.landscape_root_url)}:443 | openssl x509 | tee ${var.instance_landscape_server_ssl_public_key_path}"
-            : null,
-            "apt-get update && apt-get install -y ${coalesce(each.value.landscape_client_package, var.landscape_client_package)}",
-            join(" ", compact([
-              "sudo landscape-config --silent",
-              each.value.client_config.bus != null && each.value.client_config.bus != "" ? "--bus ${each.value.client_config.bus}" : null,
-              "--computer-title ${each.value.client_config.computer_title}",
-              "--account-name ${coalesce(each.value.client_config.account_name, var.account_name)}",
-              (each.value.client_config.registration_key != null && each.value.client_config.registration_key != "") || (var.registration_key != null && var.registration_key != "") ? "--registration-key ${coalesce(each.value.client_config.registration_key, var.registration_key)}" : null,
-              "--url ${coalesce(each.value.client_config.url, "https://${coalesce(each.value.landscape_root_url, var.landscape_root_url)}/message-system")}",
-              each.value.client_config.data_path != null && each.value.client_config.data_path != "" ? "--data-path ${each.value.client_config.data_path}" : null,
-              each.value.client_config.log_dir != null && each.value.client_config.log_dir != "" ? "--log-dir ${each.value.client_config.log_dir}" : null,
-              each.value.client_config.log_level != null && each.value.client_config.log_level != "" ? "--log-level ${each.value.client_config.log_level}" : null,
-              each.value.client_config.pid_file != null && each.value.client_config.pid_file != "" ? "--pid-file ${each.value.client_config.pid_file}" : null,
-              "--ping-url ${coalesce(each.value.client_config.ping_url, "http://${coalesce(each.value.landscape_root_url, var.landscape_root_url)}/ping")}",
-              each.value.client_config.include_manager_plugins != null && each.value.client_config.include_manager_plugins != "" ? "--include-manager-plugins ${each.value.client_config.include_manager_plugins}" : null,
-              each.value.client_config.include_monitor_plugins != null && each.value.client_config.include_monitor_plugins != "" ? "--include-monitor-plugins ${each.value.client_config.include_monitor_plugins}" : null,
-              each.value.client_config.script_users != null && each.value.client_config.script_users != "" ? "--script-users ${each.value.client_config.script_users}" : null,
-              "--ssl-public-key ${coalesce(each.value.server_ssl_public_key_path, var.instance_landscape_server_ssl_public_key_path)}",
-              each.value.client_config.tags != null && each.value.client_config.tags != "" ? "--tags ${each.value.client_config.tags}" : null,
-              each.value.client_config.access_group != null && each.value.client_config.access_group != "" ? "--access-group ${each.value.client_config.access_group}" : null,
-              each.value.client_config.exchange_interval != null ? "--exchange-interval ${each.value.client_config.exchange_interval}" : null,
-              each.value.client_config.urgent_exchange_interval != null ? "--urgent-exchange-interval ${each.value.client_config.urgent_exchange_interval}" : null,
-              each.value.client_config.ping_interval != null ? "--ping-interval ${each.value.client_config.ping_interval}" : null,
-              each.value.http_proxy != null && each.value.http_proxy != "" ? "--http-proxy ${each.value.http_proxy}" : null,
-              each.value.https_proxy != null && each.value.https_proxy != "" ? "--https-proxy ${each.value.https_proxy}" : null
-            ]))
-          ]))}"
+          "/bin/bash", "-c",
+          "echo | openssl s_client -connect ${coalesce(each.value.landscape_root_url, var.landscape_root_url)}:443 | openssl x509 > ${coalesce(each.value.server_ssl_public_key_path, var.instance_landscape_server_ssl_public_key_path)}"
+        ]
+        trigger       = "once"
+        record_output = true
+        fail_on_error = true
+      },
+      "003-install" = {
+        command = [
+          "/bin/bash", "-c",
+          "apt-get update && apt-get install -y ${coalesce(each.value.landscape_client_package, var.landscape_client_package)}"
+        ]
+        trigger       = "once"
+        record_output = true
+        fail_on_error = true
+      },
+      "004-config" = {
+        command = [
+          "/bin/bash", "-c",
+          join(" ", compact(concat([
+            "sudo landscape-config --silent",
+            "--computer-title ${each.value.client_config.computer_title}",
+            "--account-name ${coalesce(each.value.client_config.account_name, var.account_name)}",
+            (each.value.client_config.registration_key != null && each.value.client_config.registration_key != "") || (var.registration_key != null && var.registration_key != "") ? "--registration-key ${coalesce(each.value.client_config.registration_key, var.registration_key)}" : null,
+            "--url ${coalesce(each.value.client_config.url, "https://${coalesce(each.value.landscape_root_url, var.landscape_root_url)}/message-system")}",
+            each.value.client_config.data_path != null && each.value.client_config.data_path != "" ? "--data-path ${each.value.client_config.data_path}" : null,
+            each.value.client_config.log_dir != null && each.value.client_config.log_dir != "" ? "--log-dir ${each.value.client_config.log_dir}" : null,
+            each.value.client_config.log_level != null && each.value.client_config.log_level != "" ? "--log-level ${each.value.client_config.log_level}" : null,
+            each.value.client_config.pid_file != null && each.value.client_config.pid_file != "" ? "--pid-file ${each.value.client_config.pid_file}" : null,
+            "--ping-url ${coalesce(each.value.client_config.ping_url, "http://${coalesce(each.value.landscape_root_url, var.landscape_root_url)}/ping")}",
+            each.value.client_config.include_manager_plugins != null && each.value.client_config.include_manager_plugins != "" ? "--include-manager-plugins ${each.value.client_config.include_manager_plugins}" : null,
+            each.value.client_config.script_users != null && each.value.client_config.script_users != "" ? "--script-users ${each.value.client_config.script_users}" : null,
+            "--ssl-public-key ${coalesce(each.value.server_ssl_public_key_path, var.instance_landscape_server_ssl_public_key_path)}",
+            each.value.client_config.tags != null && each.value.client_config.tags != "" ? "--tags ${each.value.client_config.tags}" : null,
+            each.value.client_config.access_group != null && each.value.client_config.access_group != "" ? "--access-group ${each.value.client_config.access_group}" : null,
+            each.value.client_config.exchange_interval != null ? "--exchange-interval ${each.value.client_config.exchange_interval}" : null,
+            each.value.client_config.urgent_exchange_interval != null ? "--urgent-exchange-interval ${each.value.client_config.urgent_exchange_interval}" : null,
+            each.value.client_config.ping_interval != null ? "--ping-interval ${each.value.client_config.ping_interval}" : null,
+            each.value.http_proxy != null && each.value.http_proxy != "" ? "--http-proxy ${each.value.http_proxy}" : null,
+            each.value.https_proxy != null && each.value.https_proxy != "" ? "--https-proxy ${each.value.https_proxy}" : null
+          ], each.value.additional_landscape_config_args != null ? each.value.additional_landscape_config_args : [])))
         ]
         trigger       = "once"
         record_output = true

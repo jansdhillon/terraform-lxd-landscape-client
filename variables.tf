@@ -34,18 +34,16 @@ variable "instance_type" {
 
 variable "instances" {
   type = set(object({
+    additional_landscape_config_args = optional(list(string))
     client_config = object({
       account_name             = optional(string)
       access_group             = optional(string)
-      bus                      = optional(string)
       computer_title           = string
       data_path                = optional(string)
       exchange_interval        = optional(number)
       include_manager_plugins  = optional(string)
-      include_monitor_plugins  = optional(string)
       log_dir                  = optional(string)
       log_level                = optional(string)
-      package_hash_id_url      = optional(string)
       pid_file                 = optional(string)
       ping_interval            = optional(number)
       ping_url                 = optional(string)
@@ -62,7 +60,7 @@ variable "instances" {
       type       = string
       properties = map(string)
     })), [])
-    # NOTE: Scripts are run in alphabetical order. The setup script is 001-setup.
+    # NOTE: Scripts are run in alphabetical order.
     execs = optional(list(object({
       name          = string
       command       = list(string)
@@ -90,7 +88,7 @@ variable "instances" {
     image_alias                = optional(string)
     instance_type              = optional(string)
     server_ssl_public_key_path = optional(string, "/etc/landscape/server.pem")
-    landscape_client_package   = optional(string)
+    landscape_client_package   = optional(string, "landscape-client")
     landscape_root_url         = optional(string)
     ppa                        = optional(string)
     profiles                   = optional(list(string))
