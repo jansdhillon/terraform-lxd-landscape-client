@@ -10,12 +10,10 @@ output "status" {
   }
 }
 
-output "setup_output" {
+
+output "execs_output" {
   value = {
-    for idx, instance in lxd_instance.instance : idx => {
-      code = instance.execs["001-setup"].exit_code
-      out  = instance.execs["001-setup"].stdout
-      err  = instance.execs["001-setup"].stderr
-    }
+    for idx, instance in lxd_instance.instance : idx => instance.execs
   }
+  sensitive = true
 }
