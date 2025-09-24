@@ -89,7 +89,13 @@ The setup composes of the following stages:
 - `003-install`: Installs Landscape Client. By deafult, this will just be `landcape-client` but it can be overriden to specify a specific package (version).
 - `004-config`: Calls `landscape-config` with the given `client_config` options and the `additional_landscape_config_args`. If successful, the client will be registered with Landscape Server.
 
-The `execs_output` output can be analyzed after a successful apply, for example:
+The `execs_output` map output can be analyzed after a successful apply, for example:
+
+```sh
+terraform output -json execs_output | jq -r '."client-0"`
+```
+
+The `code`, `stdout`, and `stderr` attributes can be accessed on specific commands (accessed by name):
 
 ```sh
 terraform output -json execs_output | jq -r '."client-0"."004-config".stderr'
